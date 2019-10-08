@@ -1,29 +1,54 @@
 import React, { useState, useContext, useEffect } from "react";
-import AuthContext from '../../context/auth/AuthContext';
+import AlertContext from "../../context/alert/alertContext";
+import AuthContext from "../../context/auth/AuthContext";
 
 const Register = props => {
-const authContext = useContext(AuthContext);
+  const alertContext = useContext(AlertContext);
+  const authContext = useContext(AuthContext);
 
-// const {register, isAuthentication} = authContext
+  const { setAlert } = alertContext;
+  const { register, error, clearErrors, isAuthenticated } = authContext;
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      props.history.push('/');
+    }
+
+    if (error === "User already exits") {
+      setAlert(error, "danger");
+      clearErrors();
+    }
+    // eslint-disable-next-line
+  }, [error, isAuthenticated, props.history]);
 
   const [user, setUser] = useState({
     name: "",
     email: "",
-    passord: "",
+    password: "",
     password2: ""
   });
-  const {name, email, password, password2  } = user
-  const onChange = e => setUser({ ...user, [e.target.name]: e.target.value });
+  const { name, email, password, password2 } = user;
 
-  const onSubmit = e =>{
-      e.preventDefault();
-      console.log("from submited");
-  }
+  const onChange = e => setUser({ ...user, [e.target.name]: e.target.value });
+  const onSubmit = e => {
+    e.preventDefault();
+    if (name === "" || email === "" || password === "") {
+      setAlert("Please enter all fields", "danger");
+    } else if (password !== password2) {
+      setAlert(" Password does not match", "danger");
+    } else {
+      register({
+        name,
+        email,
+        password
+      });
+    }
+  };
+
   return (
-    <div className="from-container">
+    <div className="form-container">
       <h1>
-        Account
-        <span className="text-primary"> Register </span>
+        Acount <span className="text-primary">Register</span>
       </h1>
       <form onSubmit={onSubmit}>
         <div className="form-group">
@@ -31,7 +56,7 @@ const authContext = useContext(AuthContext);
           <input
             type="text"
             name="name"
-            value={name}
+            vlaue={name}
             onChange={onChange}
             required
           />
@@ -41,7 +66,7 @@ const authContext = useContext(AuthContext);
           <input
             type="email"
             name="email"
-            value={email}
+            vlaue={email}
             onChange={onChange}
             required
           />
@@ -51,9 +76,10 @@ const authContext = useContext(AuthContext);
           <input
             type="password"
             name="password"
-            value={password}
+            vlaue={password}
             onChange={onChange}
             required
+            minLength="6"
           />
         </div>
         <div className="form-group">
@@ -61,9 +87,10 @@ const authContext = useContext(AuthContext);
           <input
             type="password"
             name="password2"
-            value={password2}
+            vlaue={password2}
             onChange={onChange}
             required
+            minLength="6"
           />
         </div>
         <input
